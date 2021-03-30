@@ -97,7 +97,7 @@
 				</executions>
 				<configuration>
 					<executable>ng</executable>
-					<workingDirectory>src/main/ui/container-parser-web</workingDirectory>
+					<workingDirectory>src/main/ui/FrontEndParserApp</workingDirectory>
 					<arguments>
 						<argument>build</argument>
 					</arguments>
