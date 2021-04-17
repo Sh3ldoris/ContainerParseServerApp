@@ -8,11 +8,14 @@
 ```
 - go inside that new directory
 - clone repository : https://github.com/Sh3ldoris/FrontEndParserApp
+- go inside that repository and run:
+```bash
+  npm install
+```
 
 ### Run application on your localhost:
 - in directory `src\main\ui\FrontEndParserApp` run:
 ```bash
-  npm install
   ng serve
 ```
 - open java project in IDE and run spring boot
