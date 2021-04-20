@@ -10,5 +10,5 @@ public interface IContainerParserService {
      * @param containerDto signature container
      * @return parsing report with information
      */
-    public ContainerParsingReport parse(FileDTO containerDto);
+    ContainerParsingReport parse(FileDTO containerDto);
 }

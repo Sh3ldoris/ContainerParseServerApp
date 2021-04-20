@@ -1,5 +1,6 @@
 package sk.posam.ContainerParser.Service.impl;
 
+import eu.europa.esig.dss.asic.cades.validation.ASiCContainerWithCAdESValidator;
 import eu.europa.esig.dss.asic.xades.validation.ASiCContainerWithXAdESValidator;
 import eu.europa.esig.dss.diagnostic.CertificateWrapper;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
@@ -8,7 +9,15 @@ import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import eu.europa.esig.dss.service.crl.OnlineCRLSource;
+import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
+import eu.europa.esig.dss.service.tsp.OnlineTSPSource;
 import eu.europa.esig.dss.simplereport.jaxb.XmlSignature;
+import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
+import eu.europa.esig.dss.spi.x509.KeyStoreCertificateSource;
+import eu.europa.esig.dss.spi.x509.revocation.crl.CRLSource;
+import eu.europa.esig.dss.tsl.service.TSLRepository;
+import eu.europa.esig.dss.tsl.service.TSLValidationJob;
 import eu.europa.esig.dss.validation.AdvancedSignature;
 import eu.europa.esig.dss.validation.CertificateVerifier;
 import eu.europa.esig.dss.validation.CommonCertificateVerifier;
@@ -59,28 +68,43 @@ public class ContainerParserService implements IContainerParserService {
 
         //Vytvori sa report pre zapis informacii
         ContainerParsingReport containerReport = new ContainerParsingReport();
-        SignedDocumentValidator documentValidator;
+        SignedDocumentValidator cAdESValidator;
+        SignedDocumentValidator xAdESValidator;
 
         try {
-            documentValidator = getDocValidator(container);
+            //Vytvoria sa validatory pre typy podpisov pre kontajner
+            cAdESValidator = new ASiCContainerWithCAdESValidator(container);
+            xAdESValidator = new ASiCContainerWithXAdESValidator(container);
         } catch (DSSException e) {
             LOGGER.error("Cannot create document validator:" + e.toString());
             throw new ContainerParserException("Cannot create document validator:" + e.toString());
         }
 
+        containerReport.addInformation(parseWithValidator(cAdESValidator));
+        containerReport.addInformation(parseWithValidator(xAdESValidator));
+        containerReport.setContainerName(container.getName());
+
+
+        return containerReport;
+    }
+
+    private ContainerParsingReport parseWithValidator(SignedDocumentValidator validator) {
+
+        //Vytvori sa report pre zapis informacii
+        ContainerParsingReport containerReport = new ContainerParsingReport();
+        SignedDocumentValidator documentValidator;
+
+        documentValidator = validator;
+
+        documentValidator.setCertificateVerifier(getCertificateVerifier());
+        documentValidator.setValidationLevel(ValidationLevel.ARCHIVAL_DATA);
+        documentValidator.setEnableEtsiValidationReport(true);
+        documentValidator.setEnableEtsiValidationReport(true);
+
         // Getting all signatures from container
         // Getting all docs from container parsed to model document class
         List<Signature> signatureList = this.getAllSignatures(documentValidator);
         List<OriginalDocument> originalDocuments = this.getAllOriginalDocuments(documentValidator, signatureList);
-
-        //V kontajneri je zahrnuty tiez aj nejaky doc pre podpisy...ale nie je relevantny pre usera
-        List<OriginalDocument> docsToDelete = new ArrayList<>();
-        originalDocuments.forEach(originalDocument -> {
-            if (!originalDocument.getType().equals("text/xml") && !originalDocument.getType().equals("application/pdf")) {
-                docsToDelete.add(originalDocument);
-            }
-        });
-        originalDocuments.removeAll(docsToDelete);
         containerReport.setOriginalDocuments(originalDocuments);
 
         // Generate reports from docs
@@ -88,14 +112,13 @@ public class ContainerParserService implements IContainerParserService {
         ValidationReportType etsiReport = reports.getEtsiValidationReportJaxb();
 
         // Set info into Container report
-        containerReport.setContainerName(container.getName());
         containerReport.setValidationDate(reports.getSimpleReport().getValidationTime());
         containerReport.setSignaturesCount(reports.getSimpleReport().getSignaturesCount());
         containerReport.setValidSignaturesCount(reports.getSimpleReport().getValidSignaturesCount());
 
         // Set attributes for each signature in container
         for (int i = 0; i < signatureList.size(); i++) {
-            XmlSignature signature = reports.getSimpleReport().getJaxbModel().getSignature().get(i);
+            XmlSignature signature = reports.getSimpleReport().getJaxbModel().getSignature().get(i); //Signature info
             String signedBy = reports.getSimpleReport().getJaxbModel().getSignature().get(i).getSignedBy();
 
             SignerInformationType signerInfo = etsiReport.getSignatureValidationReport().get(i).getSignerInformation();
@@ -120,14 +143,14 @@ public class ContainerParserService implements IContainerParserService {
         }
 
         containerReport.setSignatures(signatureList);
-
-        // Set simple and detailed report XML documents
-        containerReport.setSimpleReport(documentService.toBase64(reports.getXmlSimpleReport().getBytes()));
-        containerReport.setDetailedReport(documentService.toBase64(reports.getXmlDetailedReport().getBytes()));
-        // reports.getDiagnosticData().getUsedCertificateByIdNullSafe()
         return containerReport;
     }
 
+    /**
+     * @param data
+     * @param signatureKey
+     * @return Name of the issuer of the certificate
+     */
     private String getIssuerName(DiagnosticData data,String signatureKey) {
         CertificateWrapper cw = data.getUsedCertificateById(signatureKey);
         if (cw == null)
@@ -135,6 +158,11 @@ public class ContainerParserService implements IContainerParserService {
         return cw.getCertificateIssuerDN();
     }
 
+    /**
+     * @param data
+     * @param signatureKey
+     * @return Name of the certificate subject
+     */
     private String getSubjectName(DiagnosticData data,String signatureKey) {
         CertificateWrapper cw = data.getUsedCertificateById(signatureKey);
         if (cw == null)
@@ -142,6 +170,11 @@ public class ContainerParserService implements IContainerParserService {
         return cw.getCertificateDN();
     }
 
+    /**
+     * Searches for signatures in wrapped in Model class
+     * @param containerValidator
+     * @return
+     */
     private List<Signature> getAllSignatures(SignedDocumentValidator containerValidator) {
         ArrayList<Signature> signatures  = new ArrayList<>();
         List<AdvancedSignature> l = containerValidator.getSignatures();
@@ -151,7 +184,12 @@ public class ContainerParserService implements IContainerParserService {
 
         return signatures;
     }
-    
+
+    /**
+     * Searches for the signature scope on files
+     * @param signature
+     * @return
+     */
     private List<SignatureScopeItem> getAllSignatureScopeItems(XmlSignature signature) {
         ArrayList<SignatureScopeItem> scopeItems = new ArrayList<>();
         
@@ -161,6 +199,13 @@ public class ContainerParserService implements IContainerParserService {
         return scopeItems;
     }
 
+    /**
+     * Searches for the list of the original docs wrapped
+     * in the Model classes with information
+     * @param containerValidator
+     * @param signatures
+     * @return
+     */
     private List<OriginalDocument> getAllOriginalDocuments(SignedDocumentValidator containerValidator, List<Signature> signatures) {
         ArrayList<OriginalDocument> originalDocs = new ArrayList<>();
         List<DSSDocument> originalDDSDocuments = this.getAllSignedDSSDocuments(containerValidator, signatures);
@@ -185,18 +230,34 @@ public class ContainerParserService implements IContainerParserService {
         return originalDocs;
     }
 
+    /**
+     * Searches for the list of the original docs wrapped
+     * in the library classes
+     * @param containerValidator
+     * @param signatures
+     * @return
+     */
     private List<DSSDocument> getAllSignedDSSDocuments(SignedDocumentValidator containerValidator, List<Signature> signatures) {
         ArrayList<DSSDocument> docs = new ArrayList<>();
 
         for (int i = 0; i < signatures.size(); i++) {
-            docs.addAll(containerValidator.getOriginalDocuments(signatures.get(i).getId()));
+            containerValidator.getOriginalDocuments(signatures.get(i).getId()).forEach(doc -> {
+                if (!docs.contains(doc)) {
+                    docs.add(doc);
+                }
+            });
         }
 
         return docs;
     }
 
+    /**
+     * Checks file formats
+     * @param fileName
+     * @return
+     */
     private boolean isFormatRight(String fileName) {
-        String extension = getFileExtension(fileName);
+        String extension = getFileExtension(fileName).toLowerCase();
         return extension.equals("asice") || extension.equals("asics") || extension.equals("sce") || extension.equals("scs");
     }
 
@@ -206,24 +267,11 @@ public class ContainerParserService implements IContainerParserService {
         return (dotIndex == -1) ? "" : name.substring(dotIndex + 1);
     }
 
-    private SignedDocumentValidator getDocValidator(DSSDocument signedDocument) {
-
-        SignedDocumentValidator docV = new ASiCContainerWithXAdESValidator(signedDocument);
-        docV.setCertificateVerifier(getCertificateVerifier());
-
-        docV.setValidationLevel(ValidationLevel.ARCHIVAL_DATA);
-        docV.setEnableEtsiValidationReport(true);
-        docV.setEnableEtsiValidationReport(true);
-        return docV;
-    }
-
     private CertificateVerifier getCertificateVerifier() {
-        //Nastavenia cert verifieru ...da sa nastavit aj z local files nacitavanie certs alebo aj s custom url
         CommonCertificateVerifier certVer = new CommonCertificateVerifier();
-        // certVer.setDataLoader(new IgnoreDataLoader());
-        // certVer.setTrustedCertSource(trustStoreSource());
         certVer.setDefaultDigestAlgorithm(DigestAlgorithm.SHA512);
         certVer.setCheckRevocationForUntrustedChains(false);
+
         return certVer;
     }
 }

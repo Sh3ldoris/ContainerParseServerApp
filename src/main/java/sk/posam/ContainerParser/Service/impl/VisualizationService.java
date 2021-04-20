@@ -1,7 +1,6 @@
 package sk.posam.ContainerParser.Service.impl;
 
 import org.apache.camel.util.xml.StringSource;
-import com.itextpdf.html2pdf.HtmlConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,20 +99,10 @@ public class VisualizationService implements IVisualizationService {
     }
 
     /**
-     * Unused method
-     * @param html html to create pdf
-     * @return base64 pdf
+     * Finds part of XML that is right to visualize
+     * @param xml
+     * @return
      */
-    private String toPdf(String html) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            HtmlConverter.convertToPdf(html, baos);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return this.documentService.toBase64(baos.toByteArray());
-    }
-
     private String getXmlDataToVisualize(String xml) {
         if (xml.equals(""))
             return "";
@@ -131,8 +120,6 @@ public class VisualizationService implements IVisualizationService {
 
             StringWriter buf = new StringWriter();
             Transformer xform = TransformerFactory.newInstance().newTransformer();
-            /*xform.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            xform.setOutputProperty(OutputKeys.INDENT, "yes");*/
             xform.transform(new DOMSource(xmlData), new StreamResult(buf));
             subXml.append(buf);
         } catch (Exception e) {

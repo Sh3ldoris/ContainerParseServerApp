@@ -13,8 +13,6 @@ public class ParsedResponseDTO {
     int signaturesCount;
     int validSignaturesCount;
     List<Signature> signatures;
-    String simpleReport;
-    String detailedReport;
 
     public List<OriginalDocument> getOriginalDocuments() {
         return originalDocuments;
@@ -64,19 +62,4 @@ public class ParsedResponseDTO {
         this.signatures = signatures;
     }
 
-    public String getSimpleReport() {
-        return simpleReport;
-    }
-
-    public void setSimpleReport(String simpleReport) {
-        this.simpleReport = simpleReport;
-    }
-
-    public String getDetailedReport() {
-        return detailedReport;
-    }
-
-    public void setDetailedReport(String detailedReport) {
-        this.detailedReport = detailedReport;
-    }
 }

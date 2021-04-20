@@ -11,5 +11,5 @@ public interface IVisualizationService {
      * @param documents vstupny dokument xml
      * @return List vizualizacii ktore bolo mozne vykonat
      */
-    public List<VisualizationsFile> visualize(List<OriginalDocument> documents);
+    List<VisualizationsFile> visualize(List<OriginalDocument> documents);
 }

@@ -24,23 +24,10 @@ public class ParserController {
     private IContainerParserService containerService;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private IVisualizationService visualizationService;
 
     @PostMapping("/parse")
     public ResponseEntity<ParsedResponseDTO> parseContainer(@RequestBody FileDTO containerDTO){
         ContainerParsingReport par =  containerService.parse(containerDTO);
         return new ResponseEntity<>(this.modelMapper.map(par, ParsedResponseDTO.class), HttpStatus.OK);
     }
-
-    @PostMapping("/visualize")
-    public ResponseEntity<List<VisualizationsFile>> getVisualizations(@RequestBody List<FileDTO> documents) {
-        List<OriginalDocument> docsToVisualize = documents
-                .stream()
-                .map(user -> modelMapper.map(user, OriginalDocument.class))
-                .collect(Collectors.toList());
-
-        return new ResponseEntity<>(this.visualizationService.visualize(docsToVisualize), HttpStatus.OK);
-    }
-
 }
