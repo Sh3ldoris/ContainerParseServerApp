@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.gov.sk/form/45736359.DolozkaOVykonaniAutorizacieFunkciouPristupovehoMiesta.sk/4.0" targetNamespace="http://schemas.gov.sk/form/45736359.DolozkaOVykonaniAutorizacieFunkciouPristupovehoMiesta.sk/4.0" elementFormDefault="qualified"><xs:element name="AuthorizationClause" type="AuthorizationClauseCType"><xs:annotation><xs:documentation xml:lang="sk">
+				Dolozka o vykonani autorizacie prostrednictvom na to urcenej funkcie informacneho systemu pristupoveho miesta.
+				Potvrdenie o autorizacii vykonanej podla paragrafu 23 ods. 1 pismeno a) bod 2.
+			</xs:documentation></xs:annotation></xs:element><xs:complexType name="EFormBase" abstract="true" /><xs:complexType name="AuthorizationClauseCType"><xs:annotation><xs:documentation xml:lang="sk">
+				Dolozka o vykonani autorizacie prostrednictvom na to urcenej funkcie informacneho systemu pristupoveho miesta.
+			</xs:documentation></xs:annotation><xs:complexContent><xs:extension base="EFormBase"><xs:sequence><xs:element name="AuthorizingPerson" type="AuthorizingPersonCType" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+								Informacie o autorizujucej osobe.
+							</xs:documentation></xs:annotation></xs:element><xs:element name="PersonAuthenticationInfo" type="PersonAuthenticationInfoCType" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+								Informacie o sposobe autentifikacie autorizujucej osoby.
+							</xs:documentation></xs:annotation></xs:element><xs:element name="AuthorizationMethod" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+								Hodnota z ciselnika pre sposob autorizacie klikom. (Zatial len 1)
+								1 = autorizacia mobilom
+							</xs:documentation></xs:annotation></xs:element><xs:element name="AuthorizationMethodDescription" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+								Ludsky citatelny popis autorizacnej metody – Napr.: Autorizacia pomocou mobilneho telefonu.
+							</xs:documentation></xs:annotation></xs:element><xs:element name="AuthorisationData" type="xs:base64Binary" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+								Vystupom autorizacnej metody moze byt uistenie, ze pokyn k ukonu "na to urcenej funkcie pristupoveho miesta"
+								vznikol prave k danemu dokumentu a pod kontrolou pouzivatela (obcana). Tieto udaje nevaliduje pristupove miesto,
+								ani agendove systemy, sluzia na pripadnu dodatocnu, rucnu kontrolu.
+								Napriklad pre autorizaciu pomocou mobilneho telefonu sluzi pre dodatocnu kontrolu, ci pri autorizacii bolo
+								pouzite aj zariadenie, ktore ma obcan pod kontrolou
+								(mobilny telefon).
+							</xs:documentation></xs:annotation></xs:element></xs:sequence></xs:extension></xs:complexContent></xs:complexType><xs:complexType name="AuthorizingPersonCType"><xs:annotation><xs:documentation xml:lang="sk">
+				Informacie o autorizujucej osobe.
+			</xs:documentation></xs:annotation><xs:sequence><xs:element name="GivenName" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Meno.
+					</xs:documentation></xs:annotation></xs:element><xs:element name="FamilyName" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Priezvisko.
+					</xs:documentation></xs:annotation></xs:element><xs:element name="FormattedName" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Formatovane meno.
+					</xs:documentation></xs:annotation></xs:element><xs:element name="PersonGUID" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Univerzalny identifikator identity v eGov. Napr. identifikator identity v module IAM UPVS.
+					</xs:documentation></xs:annotation></xs:element><xs:element name="ID" type="IDCType" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Identifikator osoby. Podla zakona to moze byt pri fyzickej osobe len rodne cislo alebo zahranicny identifikator.
+					</xs:documentation></xs:annotation></xs:element></xs:sequence></xs:complexType><xs:complexType name="IDCType"><xs:annotation><xs:documentation xml:lang="sk">
+				Zlozeny datovy prvok pre identifikator osoby.
+			</xs:documentation></xs:annotation><xs:sequence><xs:element name="IdentifierType" type="CodelistDataElementCType" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						D.1.6.1 Zlozeny datovy prvok pre zakladny ciselnik, obsahujuci udaje o type pouziteho identifikatora.
+						Podradene prvky sa vyplnaju v sulade so zakladnym ciselnikom CL004001 Identifikator.
+						Uvadza sa vo dvojici s Hodnotou identifikatora
+					</xs:documentation></xs:annotation></xs:element><xs:element name="IdentifierValue" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						D.1.6.2 Obsahuje samotnu hodnotu pouziteho identifikatora.
+					</xs:documentation></xs:annotation></xs:element></xs:sequence></xs:complexType><xs:complexType name="CodelistDataElementCType"><xs:annotation><xs:documentation xml:lang="sk">
+				D.3.4 Zlozeny datovy prvok pouzivajuci udaje podla zakladnych ciselnikov.
+			</xs:documentation></xs:annotation><xs:sequence><xs:choice><xs:element name="NonCodelistData" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+							D.3.4.1 Obsahuje volnu neciselnikovu polozku. Pouziva sa ak hodnotu nie je mozne najst v ciselniku.
+						</xs:documentation></xs:annotation></xs:element><xs:element name="Codelist" type="CodelistType" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+							D.5 Zlozeny datovy prvok, ktory obsahuje polozku zo zakladneho ciselnika.
+						</xs:documentation></xs:annotation></xs:element></xs:choice></xs:sequence></xs:complexType><xs:complexType name="CodelistType"><xs:annotation><xs:documentation xml:lang="sk">
+				D.5 Zlozeny datovy prvok, ktory obsahuje polozku zo zakladneho ciselnika.
+			</xs:documentation></xs:annotation><xs:sequence><xs:element name="CodelistCode" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation>
+						D.5.1 Jedinecny kod zakladneho ciselnika
+					</xs:documentation></xs:annotation></xs:element><xs:element name="CodelistItem" type="CodelistItemCType" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						D.5.9 Zlozeny datovy prvok na popis datovej struktury polozky ciselnika. Pravidla pouzitia: Moze byt pouzity viackrat. Ciselnik musi obsahovat najmenej jednu polozku ciselnika.
+					</xs:documentation></xs:annotation></xs:element></xs:sequence></xs:complexType><xs:complexType name="CodelistItemCType"><xs:annotation><xs:documentation xml:lang="sk">
+				D.5.9 Zlozeny datovy prvok pre jednotlive polozky ciselnika
+			</xs:documentation></xs:annotation><xs:sequence><xs:element name="ItemCode" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						D.5.9.1 Jedinecny kod polozky.
+					</xs:documentation></xs:annotation></xs:element><xs:element name="ItemName" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						D.5.9.2 Uplny nazov polozky.
+					</xs:documentation></xs:annotation></xs:element></xs:sequence></xs:complexType><xs:complexType name="PersonAuthenticationInfoCType"><xs:annotation><xs:documentation xml:lang="sk">
+				Informacie o sposobe autentifikacie autorizujucej osoby.
+			</xs:documentation></xs:annotation><xs:sequence><xs:element name="PersonAuthResourceID" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Identifikator autentifikacneho prostriedku osoby, napr. PNO, PCO, mID.
+					</xs:documentation></xs:annotation></xs:element><xs:element name="PersonAuthResourceType" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Kod z ciselnika - povolene hodnoty
+						2 = eID
+						4 = Certifikat
+						9 = eIDAS
+						10 = mID
+					</xs:documentation></xs:annotation><xs:simpleType><xs:restriction base="xs:string"><xs:enumeration value="2" /><xs:enumeration value="4" /><xs:enumeration value="9" /><xs:enumeration value="10" /></xs:restriction></xs:simpleType></xs:element><xs:element name="PersonIDIssuer" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Krajina, ktorá vydala autentifikacny prostriedok. (zatial len SK)
+					</xs:documentation></xs:annotation></xs:element><xs:element name="QAALevel" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Uroven autentifikacie pouziteho autentifikacneho prostriedku.
+						Hodnota 3 zodpoveda urovni zabezpecenia „substantial“ (pokrocila).
+						Hodnota 4 zodpoveda urovni zabezpecenia „high“ (vysoka).
+					</xs:documentation></xs:annotation></xs:element><xs:element name="AuthenticationReceipt" type="AuthenticationReceiptCType" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Vysledok autentifikacie (moze byt dodatocnej), ktora bola pouzita pred ukonom autorizacie.
+						Napr. SAML alebo Oauth2 token vydany pristupovym miestom.
+						Obsahuje „potvrdenku“ o vydani autentifikacnych informacii pri dodatocnej autentifikacii.
+						Je to dokaz, ze bol dany pouzivatel autentifikovany, v pripade potreby overitelny (rucne, automatizovane – je
+						na pristupovom mieste). Moze to byt cislo transakcie pre dohladavanie v logoch mechanizmu pristupoveho
+						miesta.
+					</xs:documentation></xs:annotation></xs:element></xs:sequence></xs:complexType><xs:complexType name="AuthenticationReceiptCType"><xs:annotation><xs:documentation xml:lang="sk">
+				Vysledok autentifikacie (moze byt dodatocnej), ktora bola pouzita pred ukonom autorizacie.
+				Napr. SAML alebo Oauth2 token vydany pristupovym miestom.
+				Obsahuje „potvrdenku“ o vydani autentifikacnych informacii pri dodatocnej autentifikacii.
+				Je to dokaz, ze bol dany pouzivatel autentifikovany, v pripade potreby overitelny (rucne, automatizovane – je
+				na pristupovom mieste). Moze to byt cislo transakcie pre dohladavanie v logoch mechanizmu pristupoveho
+				miesta..
+			</xs:documentation></xs:annotation><xs:sequence><xs:element name="Mimetype" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Mimetype potvrdenia, napr. application/xml.
+					</xs:documentation></xs:annotation></xs:element><xs:element name="Encoding" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Kodovanie potvrdenia
+					</xs:documentation></xs:annotation></xs:element><xs:element name="Class" type="xs:string" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Druh potvrdenia.
+					</xs:documentation></xs:annotation></xs:element><xs:element name="Data" type="xs:base64Binary" nillable="false" minOccurs="1" maxOccurs="1"><xs:annotation><xs:documentation xml:lang="sk">
+						Vysledok autentifikacie (moze byt dodatocnej), ktora bola pouzita pred ukonom autorizacie.
+						Napr. SAML alebo Oauth2 token vydany pristupovym miestom.
+						Obsahuje „potvrdenku“ o vydani autentifikacnych informacii pri dodatocnej autentifikacii.
+						Je to dokaz, ze bol dany pouzivatel autentifikovany, v pripade potreby overitelny (rucne, automatizovane – je
+						na pristupovom mieste). Moze to byt cislo transakcie pre dohladavanie v logoch mechanizmu pristupoveho
+						miesta.
+					</xs:documentation></xs:annotation></xs:element></xs:sequence></xs:complexType></xs:schema>

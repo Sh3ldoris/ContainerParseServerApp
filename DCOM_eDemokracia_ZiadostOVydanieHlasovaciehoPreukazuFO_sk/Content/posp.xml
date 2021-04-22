@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><posp xmlns=""><fields><field><id>CheckZEP</id><value>true</value></field><field><id>PaymentOrder</id><value>false</value></field><field><id>Delivery</id><value>false</value></field><field><id>Sign</id><value>false</value></field></fields><orchestration><id>1</id></orchestration></posp>
