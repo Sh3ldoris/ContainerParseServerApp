@@ -9,15 +9,7 @@ import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.InMemoryDocument;
-import eu.europa.esig.dss.service.crl.OnlineCRLSource;
-import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
-import eu.europa.esig.dss.service.tsp.OnlineTSPSource;
 import eu.europa.esig.dss.simplereport.jaxb.XmlSignature;
-import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
-import eu.europa.esig.dss.spi.x509.KeyStoreCertificateSource;
-import eu.europa.esig.dss.spi.x509.revocation.crl.CRLSource;
-import eu.europa.esig.dss.tsl.service.TSLRepository;
-import eu.europa.esig.dss.tsl.service.TSLValidationJob;
 import eu.europa.esig.dss.validation.AdvancedSignature;
 import eu.europa.esig.dss.validation.CertificateVerifier;
 import eu.europa.esig.dss.validation.CommonCertificateVerifier;
@@ -39,8 +31,6 @@ import sk.posam.ContainerParser.Service.IContainerParserService;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 @Service
 public class ContainerParserService implements IContainerParserService {
@@ -261,8 +251,9 @@ public class ContainerParserService implements IContainerParserService {
         return extension.equals("asice") || extension.equals("asics") || extension.equals("sce") || extension.equals("scs");
     }
 
-    public static String getFileExtension(String name) {
-        checkNotNull(name);
+    private String getFileExtension(String name) {
+        if (name == null)
+            return "";
         int dotIndex = name.lastIndexOf('.');
         return (dotIndex == -1) ? "" : name.substring(dotIndex + 1);
     }
